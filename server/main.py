@@ -36,6 +36,9 @@ class Server(ThreadingHTTPServer):
         self.public_origin=origin or ''
         if self.public_origin and (urlsplit(self.public_origin).scheme!='https' or urlsplit(self.public_origin).path or urlsplit(self.public_origin).query or urlsplit(self.public_origin).username): raise ValueError('PUBLIC_ORIGIN 必须为无路径的HTTPS来源')
         self.origins={self.public_origin} if self.public_origin else {f'http://{host}:{port}' for host in ('localhost','127.0.0.1') for port in (5201,5211)}
+        demo_origin=os.environ.get('DEMO_ORIGIN','').strip()
+        if demo_origin:
+            self.origins=set(self.origins); self.origins.add(demo_origin)
     def server_close(self):
         super().server_close()
         if hasattr(self,'ledger'): self.ledger.close()
